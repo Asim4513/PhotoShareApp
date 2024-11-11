@@ -1,0 +1,15 @@
+.topbar-appBar {
+  background-color: #6b705c; 
+  color: #ffe8d6; 
+  box-shadow: none; 
+  justify-content: center;
+}
+
+.topbar-toolbar {
+  padding: 0 20px; 
+}
+
+.topbar-title {
+  font-family: 'Courier New', Courier, monospace; 
+  font-weight: bold;
+}

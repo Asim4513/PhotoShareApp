@@ -1,0 +1,17 @@
+.imageListItem img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+
+.imageListItemBar {
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.5); 
+}
+
+.commentBox {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
