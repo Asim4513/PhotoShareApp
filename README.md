@@ -1,4 +1,4 @@
-# 📸 Photo Share App (Project 6)
+# 📸 Photo Share App
 
 ![Node.js](https://img.shields.io/badge/Node.js-v16+-brightgreen)
 ![MongoDB](https://img.shields.io/badge/MongoDB-v5+-blue)
