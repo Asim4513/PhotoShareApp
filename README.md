@@ -36,8 +36,8 @@ Before you begin, ensure you have the following software installed:
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/yourusername/photoshare-app.git
-   cd photoshare-app
+   git clone https://github.com/Asim4513/PhotoShareApp.git
+   cd PhotoShareApp
    
 2. **Install Dependencies**:
    ```bash
