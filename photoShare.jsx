@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import ReactDOM from "react-dom/client";
 import { Grid, Paper, Typography } from "@mui/material";
-import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
+import { HashRouter, Routes, Route, Navigate, useParams } from "react-router-dom";
 import "./styles/main.css";
 import TopBar from "./components/TopBar";
 import UserDetail from "./components/UserDetail";
