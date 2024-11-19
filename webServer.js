@@ -48,6 +48,19 @@ const SchemaInfo = require("./schema/schemaInfo.js");
 const session = require("express-session");
 const bodyParser = require("body-parser");
 const multer = require("multer");
+const path = require('path');
+const fs = require('fs');
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+      cb(null, './images'); // Ensure this folder exists
+  },
+  filename: (req, file, cb) => {
+      const uniquePrefix = `${Date.now()}-${Math.round(Math.random() * 1E9)}`;
+      cb(null, uniquePrefix + path.extname(file.originalname)); // Use the original file extension
+  }
+});
+const upload = multer({ storage: storage });
 
 app.use(session({secret: "secretKey", resave: false, saveUninitialized: false}));
 app.use(bodyParser.json());
@@ -286,3 +299,17 @@ app.post('/commentsOfPhoto/:photo_id', requireLogin, async (req, res) => {
   }
 });
 
+app.post('/photos/new', upload.single('uploadedphoto'), async (req, res) => {
+  if (!req.file) {
+      return res.status(400).send('No file uploaded.');
+  }
+  const newPhoto = {
+      user_id: req.session.userId, // Make sure the user is logged in
+      file_name: req.file.filename,
+      date_time: new Date()
+  };
+  // Assuming Photo is a mongoose model
+  const photo = new Photo(newPhoto);
+  await photo.save();
+  res.status(201).json(photo);
+});
