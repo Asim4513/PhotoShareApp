@@ -198,7 +198,47 @@ app.get('/photosOfUser/:id', async (req, res) => {
   }
 });
 
+app.post('/admin/login', async (req, res) => {
+  const { login_name, password } = req.body;
+  const user = await User.findOne({ login_name });
+  if (!user || user.password !== password) {
+    return res.status(400).send("Invalid login name or password");
+  }
+  req.session.userId = user._id;
+  res.json({ _id: user._id, first_name: user.first_name });
+});
 
+app.post('/admin/logout', (req, res) => {
+  req.session.destroy();
+  res.sendStatus(200);
+});
+
+app.post('/user', async (req, res) => {
+  const { login_name, password, first_name, last_name } = req.body;
+  if (!login_name || !password || !first_name || !last_name) {
+    return res.status(400).send("Required fields missing.");
+  }
+  const existingUser = await User.findOne({ login_name });
+  if (existingUser) {
+    return res.status(400).send("Login name already exists.");
+  }
+  const newUser = new User({ login_name, password, first_name, last_name });
+  await newUser.save();
+  res.status(201).send({ login_name });
+});
+
+/**
+ * Enforce log in
+ */
+function requireLogin(request, response, next) {
+  if (!request.session.userId) {
+      return response.status(401).send({ error: "Unauthorized" });
+  }
+  next();
+}
+
+// Apply to all routes that require authentication
+app.use('/api', requireLogin);
 
 
 const server = app.listen(3000, function () {
