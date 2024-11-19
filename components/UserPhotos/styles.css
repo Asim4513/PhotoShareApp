@@ -1,17 +1,22 @@
-.imageListItem img {
-    width: 100%;
-    height: auto;
-    object-fit: cover;
-}
-
-.imageListItemBar {
-    padding: 10px;
-    background: rgba(0, 0, 0, 0.5); 
-}
-
 .commentBox {
-    display: block;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .commentBox input {
+    flex-grow: 1;
+  }
+  
+  .commentBox button {
+    padding: 5px 10px;
+    background-color: #6b705c;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .commentBox button:hover {
+    background-color: #495057;
+  }
+  

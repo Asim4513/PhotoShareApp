@@ -250,3 +250,39 @@ const server = app.listen(3000, function () {
       __dirname
   );
 });
+
+/**
+ * POST /commentsOfPhoto/:photo_id - Add a comment to a specific photo.
+ */
+app.post('/commentsOfPhoto/:photo_id', requireLogin, async (req, res) => {
+  const photoId = req.params.photo_id;
+  const { comment } = req.body;
+
+  if (!comment) {
+      return res.status(400).send('Comment must not be empty');
+  }
+
+  try {
+      const photo = await Photo.findById(photoId);
+      if (!photo) {
+          return res.status(404).send('Photo not found');
+      }
+
+      const newComment = {
+          comment: comment,
+          user_id: req.session.userId,
+          date_time: new Date(),
+      };
+
+      photo.comments.push(newComment);
+      await photo.save();
+
+      // Populate user data for the new comment
+      const updatedPhoto = await Photo.findById(photoId).populate('comments.user_id', 'first_name last_name');
+      res.status(200).send(updatedPhoto);
+  } catch (error) {
+      console.error('Failed to add comment:', error);
+      res.status(500).send('Internal server error');
+  }
+});
+
