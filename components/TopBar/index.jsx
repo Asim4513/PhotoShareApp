@@ -1,9 +1,7 @@
 import React from 'react';
 import { AppBar, Toolbar, Typography, Button } from '@mui/material';
-import { useLocation } from 'react-router-dom';
 
 function TopBar({ isLoggedIn, firstName, onLogout }) {
-  const location = useLocation();
 
   return (
     <AppBar position="static">

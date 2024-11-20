@@ -7,12 +7,12 @@
   "dependencies": {
     "lodash": "^4.17.21"
   },
-  "devDependencies": {
-    "mocha": "^9.2.0"
-  },
   "scripts": {
     "test": "mocha serverApiTest.js"
   },
   "author": "Mendel Rosenblum <mendel@cs.stanford.edu> (http://www.stanford.edu/~mendel)",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "mocha": "^10.8.2"
+  }
 }

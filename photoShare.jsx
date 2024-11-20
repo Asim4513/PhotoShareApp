@@ -9,15 +9,27 @@ import UserList from "./components/UserList";
 import UserPhotos from "./components/UserPhotos";
 import LoginRegister from "./components/LoginRegister";
 
+function UserDetailWrapper() {
+  const { id } = useParams();
+  console.log("UserDetail loading for ID:", id);
+  return <UserDetail userId={id} />;
+}
+
+function UserPhotosWrapper() {
+  const { id } = useParams();  
+  console.log("UserPhotos loading for ID:", id);
+  return <UserPhotos userId={id} />;
+}
+
 function PhotoShare() {
   const [login, setLogin] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [userId, setUserId] = useState(null);
 
-  const handleLogin = (firstName, userId) => {
+  const handleLogin = (fName, id) => {
     setLogin(true);
-    setFirstName(firstName);
-    setUserId(userId);
+    setFirstName(fName);
+    setUserId(id);
   };
 
   const handleLogout = async () => {
@@ -26,22 +38,12 @@ function PhotoShare() {
       setLogin(false);
       setFirstName("");
       setUserId(null);
+
+      console.log("User logging out: " + userId);
     } else {
-      alert("Logout failed");
+      alert("Logout failed"); // eslint-disable-line no-alert
     }
   };
-
-  function UserDetailWrapper() {
-    const { userId } = useParams();
-    console.log("UserDetail loading for ID:", userId);
-    return <UserDetail userId={userId} />;
-  }
-  
-  function UserPhotosWrapper() {
-    const { userId } = useParams();  
-    console.log("UserPhotos loading for ID:", userId);
-    return <UserPhotos userId={userId} />;
-  }
 
   return (
     <HashRouter>

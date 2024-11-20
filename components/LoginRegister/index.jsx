@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, TextField, Typography, Grid, Paper } from "@mui/material";
+import { Button, TextField, Typography, Paper } from "@mui/material";
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
 
@@ -9,8 +9,11 @@ function LoginRegister({ onLogin }) {
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [error, setError] = useState("");
+  const [location, setLocation] = useState("");
+  const [description, setDescription] = useState("");
+  const [occupation, setOccupation] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -20,14 +23,13 @@ function LoginRegister({ onLogin }) {
       if (response.status === 200) {
         const { first_name, user_id } = response.data;
         onLogin(first_name, user_id); // Update the PhotoShare state
-        console.log('logged in')
+        console.log("logged in");
         navigate("/users"); // Navigate to the UserList route
       }
     } catch (err) {
       setError("Invalid login credentials");
     }
   };
-  
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -41,9 +43,13 @@ function LoginRegister({ onLogin }) {
         password,
         first_name: firstName,
         last_name: lastName,
+        location: location,
+        description: description,
+        occupation: occupation,
       });
       setError("");
-      alert("Registration successful! You can now log in.");
+      console.log(response);
+      alert("Registration successful! You can now log in."); // eslint-disable-line no-alert
       setIsRegistering(false);
     } catch (err) {
       setError("Registration failed: " + err.response.data);
@@ -90,6 +96,27 @@ function LoginRegister({ onLogin }) {
             fullWidth
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+          />
+          <TextField
+            label="Location"
+            fullWidth
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            required
+          />
+          <TextField
+            label="Description"
+            fullWidth
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            required
+          />
+          <TextField
+            label="Occupation"
+            fullWidth
+            value={occupation}
+            onChange={(e) => setOccupation(e.target.value)}
             required
           />
           {error && <Typography color="error">{error}</Typography>}

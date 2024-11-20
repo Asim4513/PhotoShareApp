@@ -34,22 +34,19 @@
 const mongoose = require("mongoose");
 mongoose.Promise = require("bluebird");
 
-// const async = require("async");
-
 const express = require("express");
 const app = express();
-
-// Load the Mongoose schema for User, Photo, and SchemaInfo
-const User = require("./schema/user.js");
-const Photo = require("./schema/photo.js");
-const SchemaInfo = require("./schema/schemaInfo.js");
 
 // Load the express middleware modules
 const session = require("express-session");
 const bodyParser = require("body-parser");
 const multer = require("multer");
 const path = require('path');
-const fs = require('fs');
+
+// Load the Mongoose schema for User, Photo, and SchemaInfo
+const User = require("./schema/user.js");
+const Photo = require("./schema/photo.js");
+const SchemaInfo = require("./schema/schemaInfo.js");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -219,15 +216,19 @@ app.post('/admin/login', async (req, res) => {
   }
   req.session.userId = user._id;
   res.json({ _id: user._id, first_name: user.first_name });
+
+  return false;
 });
 
 app.post('/admin/logout', (req, res) => {
   req.session.destroy();
   res.sendStatus(200);
+
+  return false;
 });
 
 app.post('/user', async (req, res) => {
-  const { login_name, password, first_name, last_name } = req.body;
+  const { login_name, password, first_name, last_name, location, description, occupation } = req.body;
   if (!login_name || !password || !first_name || !last_name) {
     return res.status(400).send("Required fields missing.");
   }
@@ -235,9 +236,11 @@ app.post('/user', async (req, res) => {
   if (existingUser) {
     return res.status(400).send("Login name already exists.");
   }
-  const newUser = new User({ login_name, password, first_name, last_name });
+  const newUser = new User({ login_name, password, first_name, last_name, location, description, occupation });
   await newUser.save();
   res.status(201).send({ login_name });
+
+  return false;
 });
 
 /**
@@ -248,6 +251,8 @@ function requireLogin(request, response, next) {
       return response.status(401).send({ error: "Unauthorized" });
   }
   next();
+
+  return false;
 }
 
 // Apply to all routes that require authentication
@@ -297,6 +302,8 @@ app.post('/commentsOfPhoto/:photo_id', requireLogin, async (req, res) => {
       console.error('Failed to add comment:', error);
       res.status(500).send('Internal server error');
   }
+
+  return false;
 });
 
 app.post('/photos/new', upload.single('uploadedphoto'), async (req, res) => {
@@ -312,4 +319,6 @@ app.post('/photos/new', upload.single('uploadedphoto'), async (req, res) => {
   const photo = new Photo(newPhoto);
   await photo.save();
   res.status(201).json(photo);
+
+  return false;
 });

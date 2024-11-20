@@ -86,7 +86,7 @@ function UserPhotos() {
 
     const handleCommentSubmit = async (photoId) => {
         if (!commentText[photoId]?.trim()) {
-            alert('Comment cannot be empty');
+            alert('Comment cannot be empty'); // eslint-disable-line no-alert
             return;
         }
 
@@ -94,6 +94,8 @@ function UserPhotos() {
             const response = await axios.post(`/commentsOfPhoto/${photoId}`, {
                 comment: commentText[photoId],
             });
+
+            console.log(response);
 
             const updatedPhoto = await axios.get(`/photosOfUser/${userId}`);
 
@@ -109,13 +111,13 @@ function UserPhotos() {
             setCommentText({ ...commentText, [photoId]: '' });
         } catch (error) {
             console.error('Error submitting comment:', error);
-            alert('Failed to submit comment. Please try again.');
+            alert('Failed to submit comment. Please try again.'); // eslint-disable-line no-alert
         }
     };
 
     const handlePhotoUpload = async () => {
         if (uploadInputRef.current.files.length === 0) {
-            alert('Please select a file to upload.');
+            alert('Please select a file to upload.'); // eslint-disable-line no-alert
             return;
         }
     
@@ -134,10 +136,10 @@ function UserPhotos() {
                 })));
             }
             
-            alert('Photo uploaded successfully!');
+            alert('Photo uploaded successfully!'); // eslint-disable-line no-alert
         } catch (error) {
             console.error('Error uploading photo:', error);
-            alert('Failed to upload photo. Please try again.');
+            alert('Failed to upload photo. Please try again.'); // eslint-disable-line no-alert
         }
     };
 
@@ -172,12 +174,14 @@ function UserPhotos() {
                                             <ListItemText
                                                 primary={comment.comment}
                                                 secondary={
-                                                    <StyledTypography component="span" variant="body2" color="text.primary">
-                                                        {new Date(comment.date_time).toLocaleString()} -
-                                                        <StyledLink to={`/users/${comment.user._id}`}>
-                                                            {comment.user.first_name} {comment.user.last_name}
-                                                        </StyledLink>
-                                                    </StyledTypography>
+                                                    (
+                                                        <StyledTypography component="span" variant="body2" color="text.primary">
+                                                            {new Date(comment.date_time).toLocaleString()} -
+                                                            <StyledLink to={`/users/${comment.user._id}`}>
+                                                                {comment.user.first_name} {comment.user.last_name}
+                                                            </StyledLink>
+                                                        </StyledTypography>
+                                                    )
                                                 }
                                             />
                                         </StyledListItem>
