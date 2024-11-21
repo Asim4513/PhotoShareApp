@@ -155,6 +155,9 @@ try {
  * URL /user/list - Returns all the User objects.
  */
 app.get('/user/list', async (req, res) => {
+  if (!req.session.userId) {
+    return res.status(401).send('Unauthorized');
+  }
   try {
     const users = await User.find({}, '_id first_name last_name');  // Use projection to select only needed fields
     res.json(users);
@@ -170,6 +173,9 @@ app.get('/user/list', async (req, res) => {
  * URL /user/:id - Returns the information for User (id).
  */
 app.get('/user/:id', async (req, res) => {
+  if (!req.session.userId) {
+    return res.status(401).send('Unauthorized');
+  }
   try {
     const user = await User.findById(req.params.id, '_id first_name last_name location description occupation');
     if (!user) {
@@ -187,6 +193,9 @@ app.get('/user/:id', async (req, res) => {
  * URL /photosOfUser/:id - Returns the Photos for User (id).
  */
 app.get('/photosOfUser/:id', async (req, res) => {
+  if (!req.session.userId) {
+    return res.status(401).send('Unauthorized');
+  }
   try {
     const photos = await Photo.find({ user_id: req.params.id }, '-__v').lean();  // Exclude __v field
 
@@ -238,7 +247,7 @@ app.post('/user', async (req, res) => {
   }
   const newUser = new User({ login_name, password, first_name, last_name, location, description, occupation });
   await newUser.save();
-  res.status(201).send({ login_name });
+  res.status(200).send({ login_name });
 
   return false;
 });
@@ -251,7 +260,7 @@ function requireLogin(request, response, next) {
       return response.status(401).send({ error: "Unauthorized" });
   }
   next();
-
+ 
   return false;
 }
 
@@ -307,6 +316,9 @@ app.post('/commentsOfPhoto/:photo_id', requireLogin, async (req, res) => {
 });
 
 app.post('/photos/new', upload.single('uploadedphoto'), async (req, res) => {
+  if (!req.session.userId) {
+    return res.status(401).send('Unauthorized');
+  }
   if (!req.file) {
       return res.status(400).send('No file uploaded.');
   }
