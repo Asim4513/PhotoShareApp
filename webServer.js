@@ -42,6 +42,7 @@ const session = require("express-session");
 const bodyParser = require("body-parser");
 const multer = require("multer");
 const path = require('path');
+const fs = require('fs');
 
 // Load the Mongoose schema for User, Photo, and SchemaInfo
 const User = require("./schema/user.js");
@@ -315,22 +316,55 @@ app.post('/commentsOfPhoto/:photo_id', requireLogin, async (req, res) => {
   return false;
 });
 
-app.post('/photos/new', upload.single('uploadedphoto'), async (req, res) => {
-  if (!req.session.userId) {
-    return res.status(401).send('Unauthorized');
-  }
-  if (!req.file) {
-      return res.status(400).send('No file uploaded.');
-  }
-  const newPhoto = {
-      user_id: req.session.userId, // Make sure the user is logged in
-      file_name: req.file.filename,
-      date_time: new Date()
-  };
-  // Assuming Photo is a mongoose model
-  const photo = new Photo(newPhoto);
-  await photo.save();
-  res.status(201).json(photo);
 
-  return false;
+// Set up multer with memory storage
+const processFormBody = multer({ storage: multer.memoryStorage() }).single('uploadedphoto');
+
+app.post('/photos/new', (req, res) => {
+  processFormBody(req, res, async function (err) {
+    if (err) {
+      console.error('Multer error:', err);
+      return res.status(400).send('Error uploading file.');
+    }
+
+    if (!req.file) {
+      console.error('No file received');
+      return res.status(400).send('No file uploaded.');
+    }
+
+    if (!req.session.userId) {
+      console.error('Unauthorized access');
+      return res.status(401).send('Unauthorized');
+    }
+
+    try {
+      // Generate a unique filename
+      const timestamp = Date.now();
+      const filename = `U${timestamp}_${req.file.originalname}`;
+      console.log('Generated filename:', filename);
+
+      // Save the file to the filesystem
+      const filePath = `./images/${filename}`;
+      await fs.promises.writeFile(filePath, req.file.buffer);
+      console.log('File saved successfully:', filePath);
+
+      // Save the photo to the database
+      const newPhoto = {
+        user_id: req.session.userId,
+        file_name: filename,
+        date_time: new Date(),
+      };
+
+      const photo = new Photo(newPhoto);
+      await photo.save();
+      console.log('Photo saved to database:', photo);
+
+      // Respond with a 200 OK instead of 201 Created
+      res.status(200).json(photo);
+      console.log('Response sent');
+    } catch (error) {
+      console.error('Error handling /photos/new:', error);
+      res.status(500).send('Internal server error');
+    }
+  });
 });
