@@ -1,17 +1,17 @@
 .topbar-appBar {
-  background-color: #6b705c; 
-  color: #ffe8d6; 
-  box-shadow: none; 
-  justify-content: center;
+  background-color: #6b705c !important;
+  color: #ffe8d6 !important;
+  box-shadow: none !important;
+  justify-content: center !important;
 }
 
 .topbar-toolbar {
-  padding: 0 20px; 
-  display: flex;
-  justify-content: space-between;
+  padding: 0 20px !important;
+  display: flex !important;
+  justify-content: space-between !important;
 }
 
 .topbar-title {
-  font-family: 'Courier New', Courier, monospace; 
-  font-weight: bold;
+  font-family: 'Courier New', Courier, monospace !important;
+  font-weight: bold !important;
 }
