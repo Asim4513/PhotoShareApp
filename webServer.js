@@ -41,24 +41,12 @@ const app = express();
 const session = require("express-session");
 const bodyParser = require("body-parser");
 const multer = require("multer");
-const path = require('path');
 const fs = require('fs');
 
 // Load the Mongoose schema for User, Photo, and SchemaInfo
 const User = require("./schema/user.js");
 const Photo = require("./schema/photo.js");
 const SchemaInfo = require("./schema/schemaInfo.js");
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-      cb(null, './images'); // Ensure this folder exists
-  },
-  filename: (req, file, cb) => {
-      const uniquePrefix = `${Date.now()}-${Math.round(Math.random() * 1E9)}`;
-      cb(null, uniquePrefix + path.extname(file.originalname)); // Use the original file extension
-  }
-});
-const upload = multer({ storage: storage });
 
 app.use(session({secret: "secretKey", resave: false, saveUninitialized: false}));
 app.use(bodyParser.json());
@@ -165,6 +153,8 @@ app.get('/user/list', async (req, res) => {
   } catch (error) {
     res.status(500).send('Error fetching user list');
   }
+
+  return false;
 });
 
 
@@ -216,6 +206,8 @@ app.get('/photosOfUser/:id', async (req, res) => {
   } catch (error) {
     res.status(400).send('Invalid user ID');
   }
+
+  return false;
 });
 
 app.post('/admin/login', async (req, res) => {
@@ -366,5 +358,7 @@ app.post('/photos/new', (req, res) => {
       console.error('Error handling /photos/new:', error);
       res.status(500).send('Internal server error');
     }
+
+    return false;
   });
 });
