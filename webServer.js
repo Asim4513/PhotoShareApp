@@ -48,6 +48,8 @@ const User = require("./schema/user.js");
 const Photo = require("./schema/photo.js");
 const SchemaInfo = require("./schema/schemaInfo.js");
 
+const passwordUtils = require('./password'); // Adjust path as necessary
+
 app.use(session({secret: "secretKey", resave: false, saveUninitialized: false}));
 app.use(bodyParser.json());
 
@@ -212,10 +214,20 @@ app.get('/photosOfUser/:id', async (req, res) => {
 
 app.post('/admin/login', async (req, res) => {
   const { login_name, password } = req.body;
+
+  // Find user by login_name
   const user = await User.findOne({ login_name });
-  if (!user || user.password !== password) {
+  if (!user) {
     return res.status(400).send("Invalid login name or password");
   }
+
+  // Validate password with stored salt and hash
+  const isMatch = passwordUtils.doesPasswordMatch(user.password_digest, user.salt, password);
+  if (!isMatch) {
+    return res.status(400).send("Invalid login name or password");
+  }
+
+  // Save session and respond with user details
   req.session.userId = user._id;
   res.json({ _id: user._id, first_name: user.first_name });
 
@@ -231,19 +243,39 @@ app.post('/admin/logout', (req, res) => {
 
 app.post('/user', async (req, res) => {
   const { login_name, password, first_name, last_name, location, description, occupation } = req.body;
+
+  // Ensure required fields are present
   if (!login_name || !password || !first_name || !last_name) {
     return res.status(400).send("Required fields missing.");
   }
+
+  // Check if the login name already exists
   const existingUser = await User.findOne({ login_name });
   if (existingUser) {
     return res.status(400).send("Login name already exists.");
   }
-  const newUser = new User({ login_name, password, first_name, last_name, location, description, occupation });
+
+  // Generate salted and hashed password
+  const { salt, hash } = passwordUtils.makePasswordEntry(password);
+
+  // Create new user
+  const newUser = new User({
+    login_name,
+    password_digest: hash,
+    salt,
+    first_name,
+    last_name,
+    location,
+    description,
+    occupation,
+  });
+
   await newUser.save();
   res.status(200).send({ login_name });
 
   return false;
 });
+
 
 /**
  * Enforce log in

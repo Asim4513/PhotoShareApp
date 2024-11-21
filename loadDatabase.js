@@ -27,6 +27,8 @@ const User = require("./schema/user.js");
 const Photo = require("./schema/photo.js");
 const SchemaInfo = require("./schema/schemaInfo.js");
 
+const passwordUtils = require("./password");
+
 const versionString = "1.0";
 
 // We start by removing anything that existing in the collections.
@@ -45,6 +47,8 @@ Promise.all(removePromises)
     const userModels = models.userListModel();
     const mapFakeId2RealId = {};
     const userPromises = userModels.map(function (user) {
+      const { salt, hash } = passwordUtils.makePasswordEntry("weak");
+
       return User.create({
         first_name: user.first_name,
         last_name: user.last_name,
@@ -52,7 +56,8 @@ Promise.all(removePromises)
         description: user.description,
         occupation: user.occupation,
         login_name: user.last_name.toLowerCase(),
-        password: "weak",
+        password_digest: hash,
+        salt: salt,
       })
         .then(function (userObj) {
           // Set the unique ID of the object. We use the MongoDB generated _id
