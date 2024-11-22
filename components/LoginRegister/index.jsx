@@ -23,12 +23,14 @@ function LoginRegister({ onLogin }) {
   // Function to log the user into the application
   const handleLogin = async (e) => {
     e.preventDefault();
+
     try {
       const response = await axios.post(
         "/admin/login",
         { login_name: loginName, password },
         { withCredentials: true }
       );
+      
       if (response.status === 200) {
         const { first_name, _id } = response.data; // Adjusted response data keys to match API
         onLogin(first_name, _id);

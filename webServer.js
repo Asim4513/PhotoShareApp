@@ -149,8 +149,9 @@ app.get('/user/list', async (req, res) => {
   if (!req.session.userId) {
     return res.status(401).send('Unauthorized');
   }
+
   try {
-    const users = await User.find({}, '_id first_name last_name');  // Use projection to select only needed fields
+    const users = await User.find({}, '_id first_name last_name');  
     res.json(users);
   } catch (error) {
     res.status(500).send('Error fetching user list');
@@ -169,11 +170,14 @@ app.get('/user/:id', async (req, res) => {
   if (!req.session.userId) {
     return res.status(401).send('Unauthorized');
   }
+
   try {
     const user = await User.findById(req.params.id, '_id first_name last_name location description occupation');
+
     if (!user) {
       return res.status(404).send('User not found');
     }
+
     return res.json(user);  // Explicit return for consistency
   } catch (error) {
     return res.status(400).send('Invalid user ID');  // Add return here to satisfy consistent-return rule
@@ -189,16 +193,17 @@ app.get('/photosOfUser/:id', async (req, res) => {
   if (!req.session.userId) {
     return res.status(401).send('Unauthorized');
   }
+
   try {
-    const photos = await Photo.find({ user_id: req.params.id }, '-__v').lean();  // Exclude __v field
+    const photos = await Photo.find({ user_id: req.params.id }, '-__v').lean();
 
     await Promise.all(
       photos.map(async (photo) => {
         photo.comments = await Promise.all(
           photo.comments.map(async (comment) => {
             const user = await User.findById(comment.user_id, '_id first_name last_name');
-            const { user_id, ...commentWithoutUserId } = comment;  // Exclude user_id from each comment
-            return { ...commentWithoutUserId, user };  // Include only the necessary comment fields with user details
+            const { user_id, ...commentWithoutUserId } = comment; 
+            return { ...commentWithoutUserId, user }; 
           })
         );
       })
@@ -217,13 +222,11 @@ app.get('/admin/validate-session', async (req, res) => {
     return res.status(401).send("No active session");
   }
 
-  // Fetch user details from database
   const user = await User.findById(req.session.userId);
   if (!user) {
     return res.status(401).send("Invalid session");
   }
 
-  // Respond with user details
   res.json({ _id: user._id, first_name: user.first_name, login_name: user.login_name });
 
   return false;
@@ -233,19 +236,18 @@ app.get('/admin/validate-session', async (req, res) => {
 app.post('/admin/login', async (req, res) => {
   const { login_name, password } = req.body;
 
-  // Find user by login_name
   const user = await User.findOne({ login_name });
+
   if (!user) {
     return res.status(400).send("Invalid login name or password");
   }
 
-  // Validate password with stored salt and hash
   const isMatch = passwordUtils.doesPasswordMatch(user.password_digest, user.salt, password);
+
   if (!isMatch) {
     return res.status(400).send("Invalid login name or password");
   }
 
-  // Save session and respond with user details
   req.session.userId = user._id;
   res.json({ _id: user._id, first_name: user.first_name });
 
@@ -262,21 +264,17 @@ app.post('/admin/logout', (req, res) => {
 app.post('/user', async (req, res) => {
   const { login_name, password, first_name, last_name, location, description, occupation } = req.body;
 
-  // Ensure required fields are present
   if (!login_name || !password || !first_name || !last_name) {
     return res.status(400).send("Required fields missing.");
   }
 
-  // Check if the login name already exists
   const existingUser = await User.findOne({ login_name });
   if (existingUser) {
     return res.status(400).send("Login name already exists.");
   }
 
-  // Generate salted and hashed password
   const { salt, hash } = passwordUtils.makePasswordEntry(password);
 
-  // Create new user
   const newUser = new User({
     login_name,
     password_digest: hash,
@@ -310,9 +308,9 @@ function requireLogin(request, response, next) {
 // Apply to all routes that require authentication
 app.use('/api', requireLogin);
 
-
 const server = app.listen(3000, function () {
   const port = server.address().port;
+
   console.log(
     "Listening at http://localhost:" +
       port +
@@ -347,9 +345,9 @@ app.post('/commentsOfPhoto/:photo_id', requireLogin, async (req, res) => {
       photo.comments.push(newComment);
       await photo.save();
 
-      // Populate user data for the new comment
       const updatedPhoto = await Photo.findById(photoId).populate('comments.user_id', 'first_name last_name');
       res.status(200).send(updatedPhoto);
+
   } catch (error) {
       console.error('Failed to add comment:', error);
       res.status(500).send('Internal server error');
@@ -380,17 +378,14 @@ app.post('/photos/new', (req, res) => {
     }
 
     try {
-      // Generate a unique filename
       const timestamp = Date.now();
       const filename = `U${timestamp}_${req.file.originalname}`;
       console.log('Generated filename:', filename);
 
-      // Save the file to the filesystem
       const filePath = `./images/${filename}`;
       await fs.promises.writeFile(filePath, req.file.buffer);
       console.log('File saved successfully:', filePath);
 
-      // Save the photo to the database
       const newPhoto = {
         user_id: req.session.userId,
         file_name: filename,
@@ -401,9 +396,9 @@ app.post('/photos/new', (req, res) => {
       await photo.save();
       console.log('Photo saved to database:', photo);
 
-      // Respond with a 200 OK instead of 201 Created
       res.status(200).json(photo);
       console.log('Response sent');
+      
     } catch (error) {
       console.error('Error handling /photos/new:', error);
       res.status(500).send('Internal server error');
