@@ -212,6 +212,24 @@ app.get('/photosOfUser/:id', async (req, res) => {
   return false;
 });
 
+app.get('/admin/validate-session', async (req, res) => {
+  if (!req.session.userId) {
+    return res.status(401).send("No active session");
+  }
+
+  // Fetch user details from database
+  const user = await User.findById(req.session.userId);
+  if (!user) {
+    return res.status(401).send("Invalid session");
+  }
+
+  // Respond with user details
+  res.json({ _id: user._id, first_name: user.first_name, login_name: user.login_name });
+
+  return false;
+});
+
+
 app.post('/admin/login', async (req, res) => {
   const { login_name, password } = req.body;
 

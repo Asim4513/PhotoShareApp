@@ -17,21 +17,25 @@ function LoginRegister({ onLogin }) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
 
-  // Used to change url upon login
+  // Used to change URL upon login
   const navigate = useNavigate();
 
   // Function to log the user into the application
   const handleLogin = async (e) => {
     e.preventDefault();
-    
     try {
-      const response = await axios.post("/admin/login", { login_name: loginName, password });
+      const response = await axios.post(
+        "/admin/login",
+        { login_name: loginName, password },
+        { withCredentials: true }
+      );
       if (response.status === 200) {
-        const { first_name, user_id } = response.data;
-        onLogin(first_name, user_id);
+        const { first_name, _id } = response.data; // Adjusted response data keys to match API
+        onLogin(first_name, _id);
         navigate("/users");
       }
     } catch (err) {
+      console.error("Login failed:", err.response?.data || err.message);
       setError("Invalid login credentials");
     }
   };
@@ -51,9 +55,9 @@ function LoginRegister({ onLogin }) {
         password,
         first_name: firstName,
         last_name: lastName,
-        location: location,
-        description: description,
-        occupation: occupation,
+        location,
+        description,
+        occupation,
       });
 
       console.log(response);
@@ -61,9 +65,9 @@ function LoginRegister({ onLogin }) {
       setError("");
       alert("Registration successful! You can now log in."); // eslint-disable-line no-alert
       setIsRegistering(false);
-
     } catch (err) {
-      setError("Registration failed: " + err.response.data);
+      console.error("Registration failed:", err.response?.data || err.message);
+      setError("Registration failed: " + (err.response?.data || "Unknown error"));
     }
   };
 
@@ -120,7 +124,6 @@ function LoginRegister({ onLogin }) {
             fullWidth
             value={location}
             onChange={(e) => setLocation(e.target.value)}
-            required
           />
           <TextField
             className="form-group"
@@ -128,7 +131,6 @@ function LoginRegister({ onLogin }) {
             fullWidth
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            required
           />
           <TextField
             className="form-group"
@@ -136,7 +138,6 @@ function LoginRegister({ onLogin }) {
             fullWidth
             value={occupation}
             onChange={(e) => setOccupation(e.target.value)}
-            required
           />
           {error && <Typography className="error-message">{error}</Typography>}
           <Button onClick={handleRegister} variant="contained" color="primary" className="form-button">
